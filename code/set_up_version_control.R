@@ -13,3 +13,6 @@ usethis::use_git()
 
 # then in shell/Terminal:
 # git remote add origin git@github.com:ucd-cws/klamath_meadow_mapping.git
+
+# and add/push changes:
+# git push --set-upstream origin master
