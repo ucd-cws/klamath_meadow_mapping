@@ -3,13 +3,13 @@
 
 library(usethis)
 
-# set up Git in Existing Project
+# OPTION 1: Preferably go to website on github for project
+# Clone from github, create new project via RStudio version control
+
+# OPTION 2: Set up Git in Existing R Project
 usethis::use_git()
 
 # now create a new Github Repo on web (best for CWS account), or 
-
-# To set up in Personal Github Page:
-# usethis::use_github()
 
 # then in shell/Terminal:
 # git remote add origin git@github.com:ucd-cws/klamath_meadow_mapping.git
