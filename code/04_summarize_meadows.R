@@ -3,11 +3,11 @@
 
 # Libraries ---------------------------------------------------------------
 
-library(tidyverse)
-library(RSQLite)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 library(sf)
 library(mapview)
-library(mapedit)
 library(purrr)
 
 
@@ -36,7 +36,7 @@ mdw_shps <- list.files(mdws_path, pattern="^Meadows_[0-9]{3}\\.shp$")
 # check one
 # read_sf(paste0(mdws_path, mdw_shps[1]), quiet = FALSE)
 
-
+# read in each shape file, merge them and make into sf features
 mdws <- tibble(fname = mdw_shps) %>%
   mutate(data = map(paste0(mdws_path, fname), read_sf)) %>%
   unnest(data) %>%
