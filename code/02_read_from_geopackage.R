@@ -5,6 +5,8 @@
 library(tidyverse)
 library(RSQLite)
 library(sf)
+# devtools::install_github("r-spatial/mapview@develop")
+# if using sf version 9.0 or above, need to install mapview dev version
 library(mapview)
 
 # Read in a Spatial File from DB ------------------------------------------
@@ -15,8 +17,11 @@ db <- "data/mdw_spatial_data.gpkg"
 h10 <- read_sf(dsn = db, layer="huc10_focus", quiet=FALSE)
 h12 <- read_sf(dsn = db, layer="huc12_focus", quiet=TRUE) # use default quiet
 nhd_springs <- read_sf(dsn = db, layer="nhd_springs_focus")
-usfs_focus <- read_sf(dsn = db, layer="usfs_focus")
-ownership_focus <- read_sf(dsn = db, layer="ownership_focus")
+usfs_focus <- read_sf(dsn = db, layer="usfs_focus", quiet=FALSE)
+ownership_focus <- read_sf(dsn = db, layer="ownership_focus", quiet=FALSE)
+
+# check
+st_crs(h10)
 
 
 # Map ---------------------------------------------------------------------

@@ -31,15 +31,13 @@ ownership_focus <- read_sf(dsn = db, layer="ownership_focus") %>%
   st_transform(4326)
 st_crs(h10)
 
-# if just reading
-# read in
-mdws <- read_sf(db, layer="meadows_klam_digitized_2020_03_03") %>% 
-  st_transform(4326)
-
 # Read and Combine Meadow Digitization Shapefiles -------------------------
 
 # need to be connected to VPN or on server:
 mdws_path <- "/Volumes/Meadows/klamath_mapping/GIS/layers/Meadow_Shapefiles/"
+
+# if just reading in single compilation
+mdws <- read_sf(mdws_path, layer="meadows_klam_digitized_2020_03_30") %>% st_transform(4326)
 
 # get all named meadow blocks
 mdw_shps <- list.files(mdws_path, pattern="^Meadows_[0-9]{3}\\.shp$")
@@ -60,7 +58,7 @@ dim(mdws)
 # how much area?
 st_area(mdws) %>% sum() %>% measurements::conv_unit(., from = "m2", to="hectare") # hectares
 
-st_area(mdws) %>% sum() %>% measurements::conv_unit(., from = "m2", to="km2") # sq km
+st_area(mdws) %>% sum() %>% measurements::conv_unit(., from = "m2", to="km2") # sq km 6.8
 
 # save this out:
 update <- gsub(pattern = "-", replacement = "_", x = Sys.Date())
@@ -79,6 +77,7 @@ g_ndvi <- read_stars("data/Greenest_pixel_composite_klamath.tif")
 
 # check dims and crs
 stars::st_dimensions(g_ndvi)
+st_crs(g_ndvi) <- 4326
 st_crs(g_ndvi)
 
 # clip to data (huc10)
@@ -99,10 +98,10 @@ plot(b1_s,
      main="Greenest Pixel (ndvi)")
 
 # plot rgb
-# plot(g_ndvi[h10_s], 
-#      rgb=1:3, 
-#      interpolate = TRUE, reset = FALSE,
-#      main="Greenest Pixel (ndvi)")
+plot(g_ndvi[h10_s],
+     rgb=1:3,
+     interpolate = TRUE, reset = FALSE,
+     main="Greenest Pixel (ndvi)")
 
 
 # TEST MAPVIEW: try with legend=FALSE or it breaks
@@ -125,6 +124,21 @@ ggplot() +
   viridis::scale_fill_viridis("Greenest Pixel", na.value="transparent")
 
 
+# Create Unique IDs for Meadows -------------------------------------------
+
+# https://richfitz.github.io/ids/
+library(ids)
+# generate proquints (pronouncable quintuplets)
+(example1 <- ids::proquint(5, 1, use_cache = TRUE))
+# convert to integers
+ids::proquint_to_int(example1)
+
+# add these to mdws
+mdws <- mdws %>% 
+  mutate(mdw_id = ids::proquint(nrow(.), n_words = 1),
+         mdw_id_int = ids::proquint_to_int(mdw_id))
+mdws <- select(mdws, mdw_id, mdw_id_int, everything())
+mapview(mdws)
 # Map ---------------------------------------------------------------------
 
 # make a mapview map
@@ -135,8 +149,8 @@ mapbases <- c("Stamen.TonerLite","OpenTopoMap", "CartoDB.PositronNoLabels", "Ope
 
 
 # mdw map
-mapview(b1[h10_s], legend=FALSE, layer.name="Band1", homebutton=FALSE) + # ndvi
-  mapview(b2[h10_s], legend=FALSE, layer.name="Band2", homebutton=FALSE) + # bare
+#mapview(b1[h10_s], legend=FALSE, layer.name="Band1", homebutton=FALSE) + # ndvi
+#mapview(b2[h10_s], legend=FALSE, layer.name="Band2", homebutton=FALSE) + # bare
   mapview(mdws, map.types=mapbases, col.regions="seagreen2", color="seagreen", lwd=2, alpha.regions=0.1, legend=TRUE, layer.name="Meadows", homebutton=FALSE) +
   mapview(h10, map.types=mapbases, col.regions=NA, color="blue", lwd=2, alpha.regions=0.2, legend=F, homebutton=FALSE) + 
   mapview(usfs_focus, map.types=mapbases, col.regions="brown", color="brown", lwd=2, alpha.regions=0.1, legend=F)
