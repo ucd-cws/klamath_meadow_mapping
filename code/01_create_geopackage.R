@@ -8,7 +8,8 @@ library(sf)
 library(mapview)
 
 # projections
-## CRS NAD83 3310
+## CRS NAD83 6339 UTM Zone 10N NAD83 2011
+## CRS NAD83 3310 CA Teal Albers
 ## CRS WGS84 4326
 ## CRS GRS80 4269
 
@@ -24,43 +25,73 @@ library(mapview)
 
 # Read in Shapes ----------------------------------------------------------
 
+# set proj of interest
+proj_sel <- 6339
+
 # huc12
-h12_focus <- st_read("data/shps/HUC12Watersheds_FocusArea.shp") %>% 
-  st_transform(3310)
+h12_focus <- read_sf("data/shps/HUC12Watersheds_FocusArea.shp", quiet = F) %>% 
+  st_transform(proj_sel)
 st_crs(h12_focus)
-#mapview(h12_focus)
 
 # huc10
-h10_focus <- st_read("data/shps/HUC10Watersheds_FocusArea.shp") %>% 
-  st_transform(3310)
-st_crs(h10_focus)
-#mapview(h10_focus)
+h10_focus <- read_sf("data/shps/HUC10Watersheds_FocusArea.shp") %>% 
+  st_transform(proj_sel)
+
+# NWI Focus Area
+nwi <- read_sf("data/shps/NWI_Focus_Area.shp") %>%
+  st_transform(proj_sel)
 
 # springs
-springs <- st_read("data/shps/NHDPlus_spring_seeps.shp") %>% st_transform(3310)
+springs <- read_sf("data/shps/NHDPlus_spring_seeps.shp") %>%
+  st_transform(proj_sel)
+
 # crop to just the focus area:
 springs_focus <- st_intersection(springs, h10_focus) %>% select(-c(OBJECTID:STATES, HUTYPE:SHAPE_LEN))
 
 # ownership
-ownership_focus <- st_read("data/shps/BasicOwnership_FocusArea.shp") %>% st_transform(3310)
+ownership_focus <- st_read("data/shps/BasicOwnership_FocusArea.shp") %>% 
+  st_transform(proj_sel)
 
 # FS lands
-usfs_focus <- st_read("data/shps/FSLands_FocusArea.shp") %>% st_transform(3310)
+usfs_focus <- read_sf("data/shps/FSLands_FocusArea.shp") %>% 
+  st_transform(proj_sel)
 st_crs(usfs_focus)
 
+# meadows layer
+mdws <- read_sf("data/shps/meadows_klam_digitized_UTM.shp", quiet = F) %>% 
+  st_transform(proj_sel)
+
+# meadows to groundtruth/validate
+mdws_validate <- read_sf("data/shps/Meadows_Validate.shp", quiet = F) %>% 
+  st_transform(proj_sel)
+
+st_crs(mdws_validate)
 
 # Write to Geopackage -----------------------------------------------------
 
 # write to geopackage
 st_write(h12_focus, dsn = 'data/mdw_spatial_data.gpkg', 
          layer = 'huc12_focus', 
-         delete_layer = TRUE) # add delete true to allow overwrite
+         # delete entire geopackage first if it exists?
+         delete_dsn = TRUE, 
+         # allow overwrite of the layer in the gpkg 
+         delete_layer = TRUE) 
+
+# for remaining layers, don't need the `delete_dsn` option
 st_write(h10_focus, dsn = 'data/mdw_spatial_data.gpkg', 
          layer = 'huc10_focus', delete_layer = TRUE)
+st_write(nwi, dsn="data/mdw_spatial_data.gpkg", 
+         layer = "nwi_focus_area", delete_layer = TRUE)
 st_write(springs_focus, dsn="data/mdw_spatial_data.gpkg", 
          layer = "nhd_springs_focus", delete_layer = TRUE)
-st_write(ownership_focus, dsn="data/mdw_spatial_data.gpkg", layer = "ownership_focus", delete_layer = TRUE)
-st_write(usfs_focus, dsn="data/mdw_spatial_data.gpkg", layer = "usfs_focus", delete_layer = TRUE)
+st_write(ownership_focus, dsn="data/mdw_spatial_data.gpkg",
+         layer = "ownership_focus", delete_layer = TRUE)
+st_write(usfs_focus, dsn="data/mdw_spatial_data.gpkg",
+         layer = "usfs_focus", delete_layer = TRUE)
+st_write(mdws, dsn = 'data/mdw_spatial_data.gpkg', 
+         layer = 'mdws_klam_digitized', delete_layer = TRUE)
+st_write(mdws_validate, dsn = 'data/mdw_spatial_data.gpkg', 
+         layer = 'mdws_validate', delete_layer = TRUE)
 
 # Check Layers ------------------------------------------------------------
 
