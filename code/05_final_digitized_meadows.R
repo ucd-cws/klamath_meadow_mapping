@@ -99,6 +99,8 @@ b3 <- g_ndvi[,,,3] # a single band
 
 # crop raster to specific area (h10 south in this case)
 b1_s <- b1[h10_s]
+g_ndvi_s <- g_ndvi[h10_s]
+
 
 # crop layer for simpler plot
 ndvi_s <- g_ndvi[h10_s]
@@ -122,8 +124,9 @@ mapbases <- c("Stamen.TonerLite","OpenTopoMap", "CartoDB.PositronNoLabels", "Ope
 
 
 # mdw map
-mapview(b1[h10_s], legend=FALSE, layer.name="Band1", homebutton=FALSE) + # ndvi
-mapview(b2[h10_s], legend=FALSE, layer.name="Band2", homebutton=FALSE) + # bare
+mapview(g_ndvi_s, legend=FALSE, layer.name="Greenest Pixel", homebutton=FALSE) +
+# mapview(b1[h10_s], legend=FALSE, layer.name="Band1", homebutton=FALSE) + # ndvi
+# mapview(b2[h10_s], legend=FALSE, layer.name="Band2", homebutton=FALSE) + # bare
   mapview(mdws, map.types=mapbases, col.regions="seagreen2", color="seagreen", lwd=2, alpha.regions=0.1, legend=TRUE, layer.name="Meadows", homebutton=FALSE) +
   mapview(h10, map.types=mapbases, col.regions=NA, color="blue", lwd=2, alpha.regions=0.2, legend=F, homebutton=FALSE) + 
   mapview(usfs_focus, map.types=mapbases, col.regions="brown", color="brown", lwd=2, alpha.regions=0.1, legend=F)
