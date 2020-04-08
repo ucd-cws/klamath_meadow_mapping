@@ -14,7 +14,6 @@ mdblink <- as_fs_path(paste0(here(), "/data/Fen_Meadows_Shasta_Trinity.mdb"))
 
 # get single table
 features <- mdb.get(mdblink, tables="Features", stringsAsFactors=F) 
-
 # drop the "attributes" component that gets added to the dataframe (annoying but won't cause trouble)
 
 # Here's a function to remove the attrs:

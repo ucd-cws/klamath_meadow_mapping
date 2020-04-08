@@ -61,6 +61,19 @@ st_crs(usfs_focus)
 mdws <- read_sf("data/shps/meadows_klam_digitized_UTM.shp", quiet = F) %>% 
   st_transform(proj_sel)
 
+# fix attrib names:
+attrib_names <- c("UID_CH", "UID_INT", "BLOCK_ID", 
+                  "STREAM_YN", "TREES_YN", "TREES_G25", "ROAD_YN",
+                  "AREA_HA", "AREA_KM", "AREA_AC", "PERIMETER_M",
+                  "NWI_FID", "CONFIDENCE", "NOTES",
+                  "HUC12_ID", "HUC12_NAME", 
+                  "ELEV_MEAN_M", "ELEV_RANGE_M",
+                  "EDGE_COMPLEXITY", 
+                  "CENTROID_X", "CENTROID_Y", "geometry")
+
+mdws <- set_names(mdws, attrib_names)
+
+
 # meadows to groundtruth/validate
 mdws_validate <- read_sf("data/shps/Meadows_Validate.shp", quiet = F) %>% 
   st_transform(proj_sel)

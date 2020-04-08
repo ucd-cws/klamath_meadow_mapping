@@ -14,19 +14,24 @@ library(mapview)
 # database
 db <- "data/mdw_spatial_data.gpkg"
 
+# check layers
+st_layers(db) 
+
 h10 <- read_sf(dsn = db, layer="huc10_focus", quiet=FALSE)
 h12 <- read_sf(dsn = db, layer="huc12_focus", quiet=TRUE) # use default quiet
+nwi <- read_sf(dsn = db, layer="nwi_focus_area")
 nhd_springs <- read_sf(dsn = db, layer="nhd_springs_focus")
-usfs_focus <- read_sf(dsn = db, layer="usfs_focus", quiet=FALSE)
-ownership_focus <- read_sf(dsn = db, layer="ownership_focus", quiet=FALSE)
+usfs_focus <- read_sf(dsn = db, layer="usfs_focus")
+ownership_focus <- read_sf(dsn = db, layer="ownership_focus")
+
+# now digitized meadows
+mdws <- read_sf(dsn=db, layer="mdws_klam_digitized")
 
 # check
-st_crs(h10)
+st_crs(mdws)
 
+# Mapview Map ---------------------------------------------------------------------
 
-# Map ---------------------------------------------------------------------
-
-# make a mapview map
 # maptypes to use:
 mapbases <- c("Stamen.TonerLite","OpenTopoMap", "CartoDB.PositronNoLabels", "OpenStreetMap", 
               "Stamen.Terrain", "Stamen.TopOSMRelief", "Stamen.TopOSMFeatures",
@@ -35,28 +40,7 @@ mapbases <- c("Stamen.TonerLite","OpenTopoMap", "CartoDB.PositronNoLabels", "Ope
 
 mapview(h10, map.types=mapbases, col.regions=NA, color="blue", lwd=2, alpha.regions=0.2, legend=F) + 
   mapview(h12, map.types=mapbases, col.regions=NA, color="skyblue", lwd=1, alpha.regions=0.2, legend=F) +
+  mapview(nwi, map.types=mapbases, col.regions="darkgreen", color="green",layer.name="NWI Wetlands")+
   mapview(usfs_focus, map.types=mapbases, col.regions=NA, color="brown", lwd=2, alpha.regions=0.2, legend=F) + 
   mapview(ownership_focus, map.types=mapbases, zcol="OWNERCLASS",  lwd=.7, alpha.regions=0.2, layer.name="Land Owner")
 
-# Add/Read in Table -----------------------------------------------------------
-
-# connect to database using dplyr
-dbcon <- src_sqlite("data/mdw_spatial_data.gpkg", create = F) 
-
-# check list of table names
-src_tbls(dbcon)
-
-# check size of tables
-map(src_tbls(dbcon), ~dim(dbReadTable(dbcon$con, .))) %>% 
-  set_names(., src_tbls(dbcon))
-
-# quickly see dim of single tables
-dim(dbReadTable(dbcon$con, "huc10_focus"))
-
-
-# ADD A TABLE
-# works but can't overwrite without append=TRUE, overwrite=T
-#copy_to(dbcon, mytable, temporary = FALSE, overwrite=TRUE) 
-
-# get table data
-#mytable <- tbl(dbcon, "mytable") %>%  collect
